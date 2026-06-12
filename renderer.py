@@ -92,7 +92,7 @@ class GameRenderer:
                 # Gambar bola ke screen
                 self.screen.blit(self.ball_images[i], (x, y))
     
-    def draw_bottom_panel(self, lives, potted_balls):
+    def draw_bottom_panel(self, current_player, potted_balls):
         """
         Menggambar panel informasi di bawah meja pool.
         Panel menampilkan:
@@ -107,9 +107,9 @@ class GameRenderer:
         pygame.draw.rect(self.screen, GameConfig.BG,
             (0, GameConfig.SCREEN_HEIGHT, GameConfig.SCREEN_WIDTH, GameConfig.BOTTOM_PANEL))
         
-        # Draw text "LIVES: X" di sebelah kanan
-        self.draw_text("LIVES: " + str(lives), self.font, GameConfig.WHITE,
-            GameConfig.SCREEN_WIDTH - 200, GameConfig.SCREEN_HEIGHT + 10)
+        turn_text = f"PLAYER {current_player} TURN"
+        self.draw_text(turn_text, self.font, GameConfig.WHITE,
+            GameConfig.SCREEN_WIDTH - 250, GameConfig.SCREEN_HEIGHT + 10)
         
         # Draw gambar-gambar bola yang sudah potted (kiri ke kanan)
         for i, ball in enumerate(potted_balls):

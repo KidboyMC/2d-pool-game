@@ -50,7 +50,10 @@ class PoolGame:
         self.clock = pygame.time.Clock()
         
         # ========== GAME STATE ==========
-        self.lives = GameConfig.INITIAL_LIVES  # Nyawa sisa (default 3)
+        self.current_player = 1                # 1 untuk Player 1, 2 untuk Player 2
+        self.player_1_target = None            # Akan berisi 'Solid' atau 'Stripe' nanti
+        self.player_2_target = None
+        self.foul_committed = False
         self.game_running = True               # Flag: game masih berjalan?
         self.taking_shot = True                # Flag: siap untuk shot berikutnya?
         self.cue_ball_potted = False           # Flag: bola putih masuk lubang?
@@ -155,7 +158,8 @@ class PoolGame:
                        267 + (row * (GameConfig.BALL_DIA + 1)) + (col * GameConfig.BALL_DIA / 2))
                 
                 # Buat ball object
-                new_ball = Ball(self.space, self.static_body, GameConfig.BALL_DIA / 2, pos)
+                current_ball_number = len(self.balls) + 1
+                new_ball = Ball(self.space, self.static_body, GameConfig.BALL_DIA / 2, pos, is_cue=False, number=current_ball_number)
                 
                 # Set gambar untuk bola ini
                 new_ball.set_image(self.ball_images[len(self.balls)])
@@ -239,27 +243,16 @@ class PoolGame:
             for pocket in self.pockets:
                 # Cek apakah bola masuk pocket
                 if pocket.is_ball_in_pocket(ball.get_position()):
-                    if ball.is_cue:  # Jika bola putih
-                        # Kurangi lives
-                        self.lives -= 1
-                        
-                        # Set flag cue ball potted
+                    if ball.is_cue:  # Jika bola putih masuk
+                        self.foul_committed = True # Pemicu ganti giliran & ball in hand
                         self.cue_ball_potted = True
-                        
-                        # Reset posisi bola putih ke luar screen
                         ball.reset_position((-100, -100))
+                    elif ball.number == 8: # Jika bola 8 masuk
+                        # TODO: Logika Menang/Kalah dieksekusi di sini
+                        pass 
                     else:  # Jika bola biasa
-                        # Hapus dari physics space
-                        self.space.remove(ball.body)
-                        
-                        # Hapus dari list balls
-                        self.balls.remove(ball)
-                        
-                        # Add gambar bola ke potted_balls (untuk display di bottom panel)
-                        self.potted_balls.append(self.ball_images[i])
-                        
-                        # Remove gambar bola dari ball_images (agar tidak digambar lagi)
-                        self.ball_images.pop(i)
+                        # Hapus dari physics space dan list seperti biasa
+                        pass
     
     def check_all_balls_stopped(self):
         """
@@ -329,7 +322,6 @@ class PoolGame:
         self.static_body = self.space.static_body
         
         # ========== RESET GAME STATE ==========
-        self.lives = GameConfig.INITIAL_LIVES
         self.game_running = True
         self.taking_shot = True
         self.cue_ball_potted = False
@@ -427,17 +419,14 @@ class PoolGame:
             self.power_meter.draw(self.screen, self.balls[-1].get_position())
         
         # ========== DRAW BOTTOM PANEL ==========
-        self.renderer.draw_bottom_panel(self.lives, self.potted_balls)
+        self.renderer.draw_bottom_panel(self.current_player, self.potted_balls)
         
         # ========== DRAW GAME OVER/WIN SCREEN ==========
-        if self.lives <= 0:  # Game over (no lives left)
+        if not self.game_running:
             self.powering_up = False
-            self.renderer.draw_game_over()
-            self.game_running = False
-        elif len(self.balls) == 1:  # Win (hanya bola putih yang tersisa)
-            self.powering_up = False
-            self.renderer.draw_win()
-            self.game_running = False
+            # Nanti logika draw_game_over() atau draw_win() 
+            # akan dipanggil berdasarkan siapa yang memasukkan bola 8
+            self.renderer.draw_game_over() 
         
         # Update display
         pygame.display.update()

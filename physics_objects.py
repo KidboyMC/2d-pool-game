@@ -10,17 +10,10 @@ class PhysicsObject:
     """
     
     def __init__(self, space, static_body):
-        """
-        Inisialisasi object fisika.
-        
-        Args:
-            space: Pymunk space untuk simulasi fisika
-            static_body: Static body untuk reference dalam physics calculations
-        """
-        self.space = space                  # Ruang fisika Pymunk
-        self.static_body = static_body      # Reference untuk static body
-        self.body = None                    # Dynamic body (akan dibuat di subclass)
-        self.shape = None                   # Shape/bentuk object (lingkaran, polygon, dll)
+        self.space = space
+        self.static_body = static_body
+        self.body = None
+        self.shape = None
     
     def create_body(self):
         """
@@ -72,7 +65,7 @@ class Ball(PhysicsObject):
     Polymorphism: Menggunakan method dari parent dengan cara yang spesifik untuk bola
     """
     
-    def __init__(self, space, static_body, radius, pos, is_cue=False):
+    def __init__(self, space, static_body, radius, pos, is_cue=False, number=0):
         """
         Inisialisasi bola pool.
         
@@ -87,6 +80,7 @@ class Ball(PhysicsObject):
         self.radius = radius                  # Jari-jari bola
         self.pos = pos                        # Posisi awal
         self.is_cue = is_cue                  # Flag untuk mengidentifikasi bola putih
+        self.number = number                  # 0=Putih, 1-7=Solid, 8=Hitam, 9-15=Garis
         self.image = None                     # Gambar bola (akan diset kemudian)
         self.create_body()                    # Buat physics body untuk bola
     

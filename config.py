@@ -18,7 +18,6 @@ class GameConfig:
     BALL_DIA = 36              # Diameter bola dalam pixel
     POCKET_DIA = 66            # Diameter lubang untuk menangkap bola
     MAX_FORCE = 10000          # Kekuatan maksimal yang bisa diberikan ke bola
-    INITIAL_LIVES = 3          # Jumlah nyawa awal pemain
     
     # ========== WARNA ==========
     BG = (50, 50, 50)          # Warna background (RGB)
