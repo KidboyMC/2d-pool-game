@@ -40,14 +40,36 @@ class GameRenderer:
         button_x = (GameConfig.SCREEN_WIDTH - button_width) // 2    # Center horizontal
         button_y = (GameConfig.SCREEN_HEIGHT - button_height) // 2 + 100  # Center vertical + 100px offset
         
-        # Buat button retry dengan konfigurasi warna
+        # ========== BUAT TOMBOL ENDGAME (RETRY & MAIN MENU) ==========
+        end_btn_width = 260
+        end_btn_height = 60
+        
+        # Tombol RETRY di sebelah kiri center
         self.retry_button = Button(
-            button_x, button_y, button_width, button_height,
-            "RETRY",  # Text tombol
-            self.large_font,
-            GameConfig.BUTTON_COLOR,          # Warna normal
-            GameConfig.BUTTON_HOVER_COLOR,    # Warna hover
-            GameConfig.BUTTON_ACTIVE_COLOR    # Warna aktif
+            GameConfig.SCREEN_WIDTH // 2 - 280, GameConfig.SCREEN_HEIGHT // 2 + 50,
+            end_btn_width, end_btn_height,
+            "RETRY", self.large_font,  # <--- Disamakan pakai font besar
+            GameConfig.BUTTON_COLOR, GameConfig.BUTTON_HOVER_COLOR, GameConfig.BUTTON_ACTIVE_COLOR
+        )
+        
+        # Tombol MAIN MENU di sebelah kanan center
+        self.menu_button = Button(
+            GameConfig.SCREEN_WIDTH // 2 + 20, GameConfig.SCREEN_HEIGHT // 2 + 50,
+            end_btn_width, end_btn_height,
+            "MAIN MENU", self.large_font, # <--- Disamakan pakai font besar
+            GameConfig.BUTTON_COLOR, GameConfig.BUTTON_HOVER_COLOR, GameConfig.BUTTON_ACTIVE_COLOR
+        )
+
+        # ========== BUAT MAIN MENU BUTTONS ==========
+        self.start_button = Button(
+            button_x, button_y - 80, button_width, button_height,
+            "START", self.large_font,
+            GameConfig.BUTTON_COLOR, GameConfig.BUTTON_HOVER_COLOR, GameConfig.BUTTON_ACTIVE_COLOR
+        )
+        self.quit_button = Button(
+            button_x, button_y + 10, button_width, button_height,
+            "QUIT", self.large_font,
+            GameConfig.BUTTON_COLOR, GameConfig.BUTTON_HOVER_COLOR, GameConfig.BUTTON_ACTIVE_COLOR
         )
     
     def draw_text(self, text, font, color, x, y):
@@ -75,38 +97,42 @@ class GameRenderer:
     
     def draw_balls(self, balls):
         """
-        Menggambar semua bola di layar.
-        Setiap bola digambar menggunakan posisi dan radius-nya.
-        
-        Args:
-            balls: List of Ball objects yang akan digambar
+        Menggambar semua bola di layar menggunakan gambar aslinya.
         """
-        for i, ball in enumerate(balls):
-            # Cek apakah ball_images tersedia untuk bola ini
-            if i < len(self.ball_images):
+        for ball in balls:
+            # Pastikan bola memiliki gambar
+            if ball.image:
                 # Hitung top-left corner untuk menggambar (center - radius)
                 ball_pos = ball.get_position()
                 x = ball_pos[0] - ball.radius
                 y = ball_pos[1] - ball.radius
                 
-                # Gambar bola ke screen
-                self.screen.blit(self.ball_images[i], (x, y))
+                # Gambar bola ke screen pakai identitas aslinya!
+                self.screen.blit(ball.image, (x, y))
     
-    def draw_bottom_panel(self, current_player, potted_balls):
+    def draw_bottom_panel(self, current_player, potted_balls, player_1_target, player_2_target):
         """
         Menggambar panel informasi di bawah meja pool.
         Panel menampilkan:
-        - Jumlah lives sisa (nyawa)
         - Gambar-gambar bola yang sudah potted (masuk lubang)
-        
-        Args:
-            lives: int, jumlah nyawa sisa
-            potted_balls: List of pygame Surface berisi gambar bola yang sudah potted
+        - Keterangan jenis bola yang dipegang Player 1 dan Player 2
+        - Teks giliran pemain aktif
         """
         # Draw background panel (dark gray rectangle)
         pygame.draw.rect(self.screen, GameConfig.BG,
             (0, GameConfig.SCREEN_HEIGHT, GameConfig.SCREEN_WIDTH, GameConfig.BOTTOM_PANEL))
         
+        # ========== TAMPILKAN TARGET BOLA PLAYER 1 & 2 ==========
+        # Jika belum ada bola yang masuk, tampilkan tanda minus (-)
+        p1_status = player_1_target if player_1_target else "-"
+        p2_status = player_2_target if player_2_target else "-"
+        target_text = f"P1: {p1_status}  |  P2: {p2_status}"
+        
+        # Digambar di area tengah panel bawah
+        self.draw_text(target_text, self.font, GameConfig.WHITE,
+            GameConfig.SCREEN_WIDTH // 2 - 120, GameConfig.SCREEN_HEIGHT + 10)
+        
+        # ========== TAMPILKAN GILIRAN PLAYER ==========
         turn_text = f"PLAYER {current_player} TURN"
         self.draw_text(turn_text, self.font, GameConfig.WHITE,
             GameConfig.SCREEN_WIDTH - 250, GameConfig.SCREEN_HEIGHT + 10)
@@ -205,18 +231,24 @@ class GameRenderer:
         self.screen.blit(overlay, (0, 0))
         
         # ========== DRAW TEXT "GAME OVER" ==========
-        self.draw_text("GAME OVER", self.large_font, GameConfig.RED,
-            GameConfig.SCREEN_WIDTH / 2 - 200, GameConfig.SCREEN_HEIGHT / 2 - 100)
+        text_str = "GAME OVER"
+        # Hitung lebar teks secara dinamis
+        text_width = self.large_font.size(text_str)[0]
+        x_center = (GameConfig.SCREEN_WIDTH - text_width) // 2
         
-        # ========== DRAW RETRY BUTTON ==========
+        self.draw_text(text_str, self.large_font, GameConfig.RED,
+            x_center, GameConfig.SCREEN_HEIGHT / 2 - 100)
+        
+        # ========== DRAW RETRY & MAIN MENU BUTTONS ==========
         self.retry_button.draw(self.screen)
+        self.menu_button.draw(self.screen)
     
-    def draw_win(self):
+    def draw_win(self, winner):
         """
-        Menggambar win screen (ketika semua bola berhasil potted).
+        Menggambar win screen.
         Screen menampilkan:
         - Semi-transparent overlay
-        - Text "YOU WIN!" dalam warna merah
+        - Text "PLAYER X WINS!" dalam warna merah
         - Tombol RETRY untuk main lagi
         """
         # ========== BUAT SEMI-TRANSPARENT OVERLAY ==========
@@ -225,9 +257,49 @@ class GameRenderer:
         overlay.fill((0, 0, 0))  # Warna hitam
         self.screen.blit(overlay, (0, 0))
         
-        # ========== DRAW TEXT "YOU WIN!" ==========
-        self.draw_text("YOU WIN!", self.large_font, GameConfig.RED,
-            GameConfig.SCREEN_WIDTH / 2 - 200, GameConfig.SCREEN_HEIGHT / 2 - 100)
+        # ========== DRAW TEXT "PLAYER X WINS!" ==========
+        # Teks berubah dinamis sesuai siapa yang menang
+        win_text = f"PLAYER {winner} WINS!"
+        text_width = self.large_font.size(win_text)[0]
+        x_center = (GameConfig.SCREEN_WIDTH - text_width) // 2
         
-        # ========== DRAW RETRY BUTTON ==========
+        self.draw_text(win_text, self.large_font, GameConfig.RED,
+            x_center, GameConfig.SCREEN_HEIGHT / 2 - 100)
+        
+        # ========== DRAW RETRY & MAIN MENU BUTTONS ==========
         self.retry_button.draw(self.screen)
+        self.menu_button.draw(self.screen)
+
+    def draw_foul_alert(self):
+        """
+        Menggambar teks peringatan FOUL di layar.
+        Teks diletakkan agak ke atas agar tidak menghalangi permainan.
+        """
+        foul_text = "FOUL! BALL IN HAND"
+        # Hitung lebar teks secara dinamis agar presisi di tengah
+        text_width = self.large_font.size(foul_text)[0]
+        x_center = (GameConfig.SCREEN_WIDTH - text_width) // 2
+        
+        # Gambar teks di koordinat Y = 150 (bagian atas meja)
+        self.draw_text(foul_text, self.large_font, GameConfig.RED, x_center, 150)
+
+    def draw_main_menu(self):
+        """Menggambar layar Main Menu"""
+        # Gambar meja biliar sebagai background
+        self.draw_table()
+        
+        # Beri efek overlay gelap agar teks dan tombol menonjol
+        overlay = pygame.Surface((GameConfig.SCREEN_WIDTH, GameConfig.SCREEN_HEIGHT + GameConfig.BOTTOM_PANEL))
+        overlay.set_alpha(200)
+        overlay.fill((0, 0, 0))
+        self.screen.blit(overlay, (0, 0))
+        
+        # Gambar Judul Game
+        title = "8-BALL MULTIPLAYER"
+        text_width = self.large_font.size(title)[0]
+        x_center = (GameConfig.SCREEN_WIDTH - text_width) // 2
+        self.draw_text(title, self.large_font, GameConfig.WHITE, x_center, 180)
+        
+        # Gambar Tombol
+        self.start_button.draw(self.screen)
+        self.quit_button.draw(self.screen)

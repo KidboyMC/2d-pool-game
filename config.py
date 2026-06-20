@@ -16,7 +16,6 @@ class GameConfig:
     
     # ========== KONFIGURASI PHYSICS ==========
     BALL_DIA = 36              # Diameter bola dalam pixel
-    POCKET_DIA = 66            # Diameter lubang untuk menangkap bola
     MAX_FORCE = 10000          # Kekuatan maksimal yang bisa diberikan ke bola
     
     # ========== WARNA ==========
@@ -65,3 +64,11 @@ class GameConfig:
         # Rail kanan (pembatas kanan)
         [(1143, 100), (1122, 130), (1122, 548), (1143, 578)],
     ]
+
+    # ========== AREA BERMAIN (PLAY AREA) ==========
+    # Batas aman untuk meletakkan bola (x_min, y_min, x_max, y_max)
+    TABLE_PLAY_AREA = (100, 56, 1100, 622)
+
+    # ========== ASSETS (FILE AUDIO) ==========
+    HIT_SOUND = "assets/audio/hit.wav"          # Suara stik memukul bola
+    POCKET_SOUND = "assets/audio/pocket.wav"    # Suara bola masuk lubang

@@ -1,6 +1,11 @@
 import pymunk
 from config import GameConfig
 
+# ========== COLLISION TYPES ==========
+# Digunakan untuk routing pymunk collision handler (misal: sound effect saat tabrakan)
+COLLISION_TYPE_BALL = 1
+COLLISION_TYPE_CUSHION = 2
+
 
 class PhysicsObject:
     """
@@ -118,8 +123,16 @@ class Ball(PhysicsObject):
         pivot.max_bias = 0          # Tidak ada bias correction
         pivot.max_force = 1000      # Gaya maksimal friction
         
+        self.pivot = pivot
+
         # Set filter untuk collision detection
         self.shape.filter = pymunk.ShapeFilter(categories=0b1)
+
+        # Collision type khusus untuk bola (dipakai collision handler, misal sound effect)
+        self.shape.collision_type = COLLISION_TYPE_BALL
+
+        # Simpan reference ke object Ball ini di shape, agar mudah diakses dari collision handler
+        self.shape.parent_object = self
         
         # Daftarkan body dan shape ke physics space
         self.space.add(self.body, self.shape, pivot)
@@ -132,9 +145,9 @@ class Ball(PhysicsObject):
         Returns:
             bool: True jika bola bergerak (velocity != 0), False jika berhenti
         """
-        vx = int(self.body.velocity[0])  # Kecepatan horizontal
-        vy = int(self.body.velocity[1])  # Kecepatan vertikal
-        return vx != 0 or vy != 0        # Bergerak jika salah satu velocity != 0
+        vx = abs(self.body.velocity[0])  # Kecepatan horizontal
+        vy = abs(self.body.velocity[1])  # Kecepatan vertikal
+        return vx > 0.5 or vy > 0.5      # Bergerak jika salah satu velocity != 0
     
     def reset_position(self, new_pos):
         """
@@ -206,6 +219,9 @@ class Cushion(PhysicsObject):
         
         # Set filter untuk collision detection
         self.shape.filter = pymunk.ShapeFilter(categories=0b10)
+
+        # Collision type khusus untuk cushion (dipakai collision handler, misal sound effect)
+        self.shape.collision_type = COLLISION_TYPE_CUSHION
         
         # Daftarkan body dan shape ke physics space
         self.space.add(self.body, self.shape)

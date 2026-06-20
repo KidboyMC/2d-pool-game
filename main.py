@@ -5,6 +5,7 @@ from game import PoolGame
 # ============================================================================
 # INISIALISASI PYGAME
 # ============================================================================
+pygame.mixer.pre_init(frequency=44100, size=-16, channels=2, buffer=4096)
 # Initialize pygame library sebelum menggunakan fitur pygame apapun
 pygame.init()
 
@@ -28,7 +29,6 @@ Struktur file project:
 - physics_objects.py - PhysicsObject, Ball, Cushion classes
 - ui_objects.py    - Button, Cue, PowerMeter, Pocket classes
 - renderer.py      - GameRenderer class
-- input_handler.py - InputHandler class
 - game.py          - PoolGame class (main game logic)
 """
 
