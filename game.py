@@ -148,7 +148,6 @@ class PoolGame:
         try:
             self.hit_sfx = pygame.mixer.Sound(GameConfig.HIT_SOUND)
             self.pocket_sfx = pygame.mixer.Sound(GameConfig.POCKET_SOUND)
-            # Catatan: collide_sfx sudah kita hapus fungsinya, jadi tidak perlu di-load lagi
             
         except AttributeError:
             print("Warning: Path audio (HIT_SOUND / POCKET_SOUND) belum ditulis di config.py!")
@@ -289,14 +288,11 @@ class PoolGame:
             )
         else:
             # ========== PYMUNK < 7.0 (API lama) ==========
+            # Hanya mendaftarkan handler ball-to-ball.
             ball_handler = self.space.add_collision_handler(
                 COLLISION_TYPE_BALL, COLLISION_TYPE_BALL
             )
             ball_handler.post_solve = self._on_ball_ball_collision
-
-            cushion_handler = self.space.add_collision_handler(
-                COLLISION_TYPE_BALL, COLLISION_TYPE_CUSHION
-            )
 
     def _impulse_to_volume(self, arbiter, min_impulse=200, max_impulse=4000):
         """
@@ -365,8 +361,7 @@ class PoolGame:
                 self.balls.remove(ball)
                 try:
                     self.space.remove(ball.body, ball.shape, ball.pivot)
-                except Exception as e:
-                    # Beri log error, jangan silent swallow
+                except (ValueError, KeyError) as e:
                     print(f"Warning Pymunk Removal: {e}") 
                 if ball.image:
                     self.potted_balls.append(ball.image)

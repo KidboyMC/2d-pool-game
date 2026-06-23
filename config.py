@@ -10,7 +10,7 @@ class GameConfig:
     
     # ========== KONFIGURASI LAYAR ==========
     SCREEN_WIDTH = 1200        # Lebar layar game (pixel)
-    SCREEN_HEIGHT = 678        # Tinggi layar game (pixel)
+    SCREEN_HEIGHT = 678        # Tinggi meja (pixel)
     BOTTOM_PANEL = 50          # Tinggi panel bawah untuk info lives dan bola potted
     FPS = 120                  # Frame per second untuk smooth gameplay
     
