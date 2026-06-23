@@ -1,6 +1,6 @@
 import pygame
 import pymunk
-from game import PoolGame
+from game.game import PoolGame
 
 # ============================================================================
 # INISIALISASI PYGAME

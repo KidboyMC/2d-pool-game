@@ -2,9 +2,9 @@ import pygame
 import pymunk
 import math
 from config import GameConfig
-from physics_objects import Ball, Cushion, COLLISION_TYPE_BALL, COLLISION_TYPE_CUSHION
-from ui_objects import Cue, PowerMeter, Pocket
-from renderer import GameRenderer
+from physics.physics_objects import Ball, Cushion, COLLISION_TYPE_BALL, COLLISION_TYPE_CUSHION
+from ui.ui_objects import Cue, PowerMeter, Pocket
+from ui.renderer import GameRenderer
 
 
 class PoolGame:

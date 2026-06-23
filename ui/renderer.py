@@ -2,7 +2,7 @@ import pygame
 import pymunk
 import math
 from config import GameConfig
-from ui_objects import Button
+from ui.ui_objects import Button
 
 
 class GameRenderer:
